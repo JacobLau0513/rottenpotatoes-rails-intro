@@ -13,22 +13,35 @@ class MoviesController < ApplicationController
   def index
     # @sort = params[:sort]
     # @movies = Movie.all.order(@sort)
-    @all_ratings = ['G','PG','PG-13','R']
-    if params[:ratings]
-      @movies = Movie.where(rating: params[:ratings].keys)
+
+    # @all_ratings = ['G','PG','PG-13','R']
+    # if params[:ratings]
+    #   @movies = Movie.where(rating: params[:ratings].keys)
+    # end
+    # case params[:sorting]
+    # when'title'
+    #   @title_header = 'hilite'
+    #   @release_date_header = 'hilite'
+    #   @movies = Movie.order('release_date')
+    # else
+    #    if params[:ratings] 
+    #     @movies = Movie.where(rating: params[:ratings].keys)
+    #   else
+    #     @movies =Movie.all
+    #   end
+    # end
+    @all_ratings = Movie.ratings
+    @sort = params[:sort] || session[:sort]
+    session[:ratings] = session[:ratings] || {'G'=>'','PG'=>'','PG-13'=>'','R'=>''}
+    @t_param = params[:ratings] || session[:ratings] 
+    session[:sort] = @sort
+    session[:ratings] = @t_param
+    @movies = Movie.where(rating: session[:ratings].keys).order(session[:sort])
+    if(params[:sort].nil? and !(session[:sort].nil?)) or (params[:ratings].nil? and !(session[:ratings].nil?))
+      flash.keep
+      redirect_to movies_path(sort: session[:sort], ratings: session[:ratings])
     end
-    case params[:sorting]
-    when'title'
-      @title_header = 'hilite'
-      @release_date_header = 'hilite'
-      @movies = Movie.order('release_date')
-    else
-       if params[:ratings] 
-        @movies = Movie.where(rating: params[:ratings].keys)
-      else
-        @movies =Movie.all
-      end
-    end
+  end
   
   end
 
